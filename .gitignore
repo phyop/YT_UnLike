@@ -1,6 +1,12 @@
 .venv/
 __pycache__/
 *.py[cod]
+
+# OAuth credentials and tokens
+config/private/
 client_secret.json
 token.json
+
+# Runtime reports
+runtime/*.json
 last_run_report.json

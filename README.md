@@ -1,95 +1,138 @@
-# YouTube 喜歡影片清理
+# YouTube Liked Videos Cleanup
 
-只保留「喜歡的影片」清單中**最近 N 部**（預設 9 部，對應你截圖中的那九部），其餘全部取消喜歡。
+A safety-first Python CLI that keeps the nine most recent videos in a YouTube account's **Liked videos** playlist and removes older likes in quota-aware batches.
 
-> 此腳本須在**你自己的電腦**執行（需要瀏覽器完成 Google 登入授權）。Cloud Agent 環境無法代你登入 YouTube。
+## Project overview
 
-## 安全設計
+Long-lived YouTube accounts can accumulate thousands of liked videos, while the official UI offers no bulk cleanup workflow. This tool uses YouTube Data API v3 and Desktop OAuth to preview the exact keep/remove split before changing the account.
 
-- **預設 dry-run**：只列出將保留／將取消的影片，不會改動帳號。
-- 真正取消喜歡必須加上 `--execute`，並輸入 `YES` 確認（或加 `--yes` 略過確認）。
-- OAuth 憑證與 token **不進 Git**（見倉庫 `.gitignore`）。
+The first production run audited 1,676 liked videos, preserved the newest nine, and safely stopped after 102 successful updates when the API returned a permission/limit signal.
 
-## 事前準備（一次即可）
+## Features
 
-1. 開啟 [Google Cloud Console](https://console.cloud.google.com/)
-2. 建立（或選用）專案 → 啟用 **YouTube Data API v3**
-3. **API 和服務 → 憑證 → 建立憑證 → OAuth 用戶端 ID**
-   - 應用程式類型選 **電腦應用程式（Desktop）**
-   - 若尚未設定 OAuth 同意畫面：選外部／測試，並把你的 Google 帳號加進測試使用者
-4. 下載 JSON，重新命名為 `client_secret.json`，放到本目錄：
+- Dry-run by default; account changes require `--execute`.
+- Preserves the playlist's newest N items (`--keep 9`).
+- Requires an explicit `YES` confirmation unless `--yes` is supplied.
+- Supports quota-aware batches with `--max-unlike`.
+- Writes a JSON audit report after every run.
+- Stops on API rate/quota signals and records failures.
+- Keeps OAuth secrets, tokens, and runtime reports out of Git.
+- Handles Unicode video titles correctly on Windows.
+
+## Tech stack
+
+- Python 3.10+
+- YouTube Data API v3
+- Google OAuth 2.0 Desktop flow
+- `google-api-python-client`
+- `unittest`
+- Git and GitHub
+- Windows (primary), Linux/macOS compatible
+
+## Architecture
+
+```mermaid
+flowchart LR
+    CLI[Python CLI] --> OAuth[Google OAuth 2.0]
+    OAuth --> API[YouTube Data API v3]
+    API --> Playlist[Liked videos playlist]
+    Playlist --> Split{Keep newest N}
+    Split --> Keep[Preserve]
+    Split --> Preview[Dry-run preview]
+    Preview -->|explicit approval| Unlike[Set rating to none]
+    Unlike --> Report[JSON audit report]
+```
+
+## Folder structure
 
 ```text
-D:\文件\260703_Al_Agent\260712_YT_UnLike\client_secret.json
+260712_YT_UnLike/
+├── config/
+│   └── private/              # ignored OAuth credentials and token
+├── docs/
+│   ├── medium-article.md
+│   └── portfolio.md
+├── runtime/                  # ignored execution reports
+├── skills/
+│   └── publish-github-medium/
+├── tests/
+│   └── test_split_keep_unlike.py
+├── cleanup_liked.py
+├── requirements.txt
+└── README.md
 ```
 
-5. 安裝相依套件：
+## Installation
 
-```bash
-cd /d D:\文件\260703_Al_Agent\260712_YT_UnLike
-python3 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+1. Enable **YouTube Data API v3** in Google Cloud Console.
+2. Create a Desktop OAuth client and save its JSON as:
+
+   `config/private/client_secret.json`
+
+3. Create and activate a virtual environment:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 ```
 
-## 使用方式
+Linux/macOS users can activate with `source .venv/bin/activate`.
 
-### 1. 先預覽（建議一定要先做）
+## Usage
 
-```bash
+Preview without changing YouTube:
+
+```powershell
 python cleanup_liked.py --keep 9
 ```
 
-首次執行會開啟瀏覽器，請登入**你的 YouTube 帳號**並允許存取。授權後會產生 `token.json`。
+Execute a conservative batch after reviewing the preview:
 
-請核對輸出中「將保留」的前 9 部，是否就是截圖那九部。
-
-### 2. 確認無誤後真正執行
-
-```bash
-python cleanup_liked.py --keep 9 --execute
+```powershell
+python cleanup_liked.py --keep 9 --execute --max-unlike 180
 ```
 
-出現提示時輸入 `YES`。
+For unattended continuation after an already-reviewed dry-run:
 
-略過確認：
-
-```bash
-python cleanup_liked.py --keep 9 --execute --yes
-```
-
-### 3. 喜歡數量很多時（API 日配額）
-
-`videos.rate`（取消喜歡）每次約消耗 50 quota。預設專案日額約 10,000，大約一天最多取消 ~200 部。
-
-可分批：
-
-```bash
+```powershell
 python cleanup_liked.py --keep 9 --execute --yes --max-unlike 180
 ```
 
-隔天再跑同一指令即可；已取消喜歡的影片不會再出現在清單中。
+## Safety model
 
-## 常用參數
+- Never commit `config/private/` or `runtime/*.json`.
+- Always run dry-run before the first destructive batch.
+- Keep batch sizes below the daily API quota.
+- A deleted/private video may return 404/403; the report preserves the error.
+- Revoking the app in Google Account permissions invalidates the local token.
 
-| 參數 | 說明 |
-|------|------|
-| `--keep N` | 保留最近 N 部（預設 9） |
-| `--execute` | 真正取消喜歡 |
-| `--yes` | 略過互動確認 |
-| `--max-unlike N` | 本次最多取消 N 部 |
-| `--credentials PATH` | `client_secret.json` 路徑 |
-| `--token PATH` | token 快取路徑 |
-| `--report PATH` | 執行報告 JSON |
+## Tests
 
-## 輸出檔（本機，勿提交）
+```powershell
+python -m unittest discover -s tests -v
+python -m py_compile cleanup_liked.py
+```
 
-- `client_secret.json` — Google OAuth 用戶端
-- `token.json` — 登入授權快取
-- `last_run_report.json` — 最近一次預覽／執行結果
+Current suite covers keeping N, keeping all, keeping zero, and invalid negative input.
 
-## 注意
+## Lessons learned
 
-- 「最近」依 YouTube「喜歡的影片」播放清單順序（通常最新喜歡在最前）。
-- 取消喜歡無法從本腳本一鍵還原；請務必先 dry-run。
-- 若 OAuth 同意畫面仍在測試模式，重新授權可能需要把帳號加進測試使用者。
+- The Liked videos playlist order is the reliable source for the newest items.
+- A safe destructive tool needs preview, confirmation, bounded batches, and audit output.
+- OAuth authorization and API enablement are independent Google Cloud steps.
+- Windows terminal encoding must be handled explicitly for global video titles.
+- API permission errors are normal operational data, not reasons to lose prior progress.
+
+## Future improvements
+
+- Persistent checkpointing and retry classification.
+- Automatic daily scheduling until only N items remain.
+- Web UI with a visual approval queue.
+- CI across Windows, Linux, and macOS.
+- Structured logging and resumable job state.
+- An AI agent that summarizes candidates while keeping final deletion approval human-controlled.
+
+## License
+
+No license has been selected yet. All rights reserved by the repository owner.

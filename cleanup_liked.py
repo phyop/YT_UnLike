@@ -27,6 +27,8 @@ DEFAULT_KEEP = 9
 # videos.rate 每次約 50 quota；預設日額 10,000 ≈ 每天最多約 200 次
 DEFAULT_SLEEP_SECONDS = 0.2
 SCRIPT_DIR = Path(__file__).resolve().parent
+PRIVATE_DIR = SCRIPT_DIR / "config" / "private"
+RUNTIME_DIR = SCRIPT_DIR / "runtime"
 
 
 @dataclass(frozen=True)
@@ -51,13 +53,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--credentials",
         type=Path,
-        default=SCRIPT_DIR / "client_secret.json",
+        default=PRIVATE_DIR / "client_secret.json",
         help="Google OAuth Desktop 應用程式 client_secret.json 路徑",
     )
     parser.add_argument(
         "--token",
         type=Path,
-        default=SCRIPT_DIR / "token.json",
+        default=PRIVATE_DIR / "token.json",
         help="OAuth token 快取路徑（會自動建立／更新）",
     )
     parser.add_argument(
@@ -85,7 +87,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--report",
         type=Path,
-        default=SCRIPT_DIR / "last_run_report.json",
+        default=RUNTIME_DIR / "last_run_report.json",
         help="執行結果報告輸出路徑",
     )
     return parser.parse_args(argv)
@@ -241,6 +243,9 @@ def write_report(
 
 
 def main(argv: list[str] | None = None) -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     args = parse_args(argv)
     if args.keep < 0:
         print("錯誤：--keep 必須 >= 0", file=sys.stderr)
