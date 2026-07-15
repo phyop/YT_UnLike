@@ -46,7 +46,7 @@ flowchart LR
 ## Folder structure
 
 ```text
-260712_YT_UnLike/
+YT_UnLike/
 ├── config/
 │   └── private/              # ignored OAuth credentials and token
 ├── docs/
