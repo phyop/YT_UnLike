@@ -1,8 +1,8 @@
-# How I Cleaned 1,676 YouTube Likes with Python—Without Trusting Automation Blindly
+# How I Cleaned 1,676 YouTube Likes with Python Without Trusting Automation Blindly
 
 ## Title options
 
-1. How I Cleaned 1,676 YouTube Likes with Python—Safely
+1. How I Cleaned 1,676 YouTube Likes with Python Safely
 2. Building a Human-in-the-Loop YouTube Cleanup Tool with Python
 3. OAuth, Quotas, and Dry Runs: Automating YouTube Like Cleanup
 4. From Cursor Prototype to Codex Production Run: A YouTube API Case Study
@@ -10,15 +10,15 @@
 
 ## The problem
 
-My YouTube “Liked videos” playlist had quietly grown to 1,676 entries. I wanted a simple outcome: keep only the nine most recently liked videos and remove the rating from everything older.
+My YouTube Liked videos playlist had quietly grown to 1,676 entries. I wanted a simple outcome: keep only the nine most recently liked videos and remove the rating from everything older.
 
 The user interface was fine for a handful of videos, but not for more than a thousand. The obvious answer was automation. The dangerous part was that the operation was destructive and account-wide. A sorting bug, reversed playlist order, or accidental confirmation could remove the wrong ratings at scale.
 
-So the real project was not “call an API in a loop.” It was to build a workflow that could prove what it intended to change before receiving permission to change anything.
+So the real project was not "call an API in a loop." It was to build a workflow that could prove what it intended to change before receiving permission to change anything.
 
 ## Why this was harder than expected
 
-YouTube Data API v3 exposes the authenticated user’s liked-video playlist and lets an application update a video rating. That sounds straightforward, but several systems have to agree:
+YouTube Data API v3 exposes the authenticated user's liked-video playlist and lets an application update a video rating. That sounds straightforward, but several systems have to agree:
 
 - Google Cloud must have YouTube Data API v3 enabled.
 - The OAuth client must be configured as a Desktop application.
@@ -86,9 +86,9 @@ During the production run, the workflow completed 102 updates before stopping sa
 The workflow is deliberately simple:
 
 1. Authenticate locally with OAuth.
-2. Resolve the authenticated user’s liked-video playlist.
+2. Resolve the authenticated user's liked-video playlist.
 3. Retrieve items in playlist order.
-4. Split the list into “keep” and “planned removal” groups.
+4. Split the list into "keep" and "planned removal" groups.
 5. Show a dry-run preview and write an audit report.
 6. Require explicit execution approval.
 7. Process a bounded batch and record every outcome.
