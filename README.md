@@ -151,7 +151,7 @@ The repository is designed to be readable by engineers who care about production
 
 ## Related Publication
 
-- [How I Cleaned 1,676 YouTube Likes with Python Without Trusting Automation Blindly](https://medium.com/@seek1andfind2/%E6%88%91%E7%94%A8-python-%E6%B8%85%E7%90%86-1-676-%E9%83%A8-youtube-%E5%96%9C%E6%AD%A1%E5%BD%B1%E7%89%87-oauth-%E8%88%87%E9%85%8D%E9%A1%8D%E8%B8%A9%E5%9D%91%E5%AF%A6%E9%8C%84-a19a81149d0d)
+- [How I Cleaned 1,676 YouTube Likes with Python Without Trusting Automation Blindly](https://medium.com/p/a19a81149d0d)
 
 ## License
 
