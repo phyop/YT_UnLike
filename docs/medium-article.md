@@ -1,13 +1,5 @@
 # How I Cleaned 1,676 YouTube Likes with Python Without Trusting Automation Blindly
 
-## Title options
-
-1. How I Cleaned 1,676 YouTube Likes with Python Safely
-2. Building a Human-in-the-Loop YouTube Cleanup Tool with Python
-3. OAuth, Quotas, and Dry Runs: Automating YouTube Like Cleanup
-4. From Cursor Prototype to Codex Production Run: A YouTube API Case Study
-5. What 1,676 Liked Videos Taught Me About Destructive Automation
-
 ## The problem
 
 My YouTube Liked videos playlist had quietly grown to 1,676 entries. I wanted a simple outcome: keep only the nine most recently liked videos and remove the rating from everything older.
@@ -116,13 +108,3 @@ Finally, operational details are part of the architecture. OAuth configuration, 
 ## Conclusion
 
 The most valuable outcome was not removing old likes; it was building an automation workflow that earned permission to act by showing its plan first.
-
-## SEO
-
-- **SEO title:** How to Clean YouTube Liked Videos with Python, OAuth, and Safe Dry Runs
-- **Meta description:** A practical case study on cleaning 1,676 YouTube liked videos with Python, YouTube Data API v3, OAuth, quota-aware batches, UTF-8 handling, and human approval.
-- **URL slug:** `python-youtube-liked-videos-cleanup-oauth-api`
-
-## Tags
-
-Python, YouTube API, OAuth, Automation, AI Agents

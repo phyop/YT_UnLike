@@ -8,6 +8,18 @@ Long-lived YouTube accounts can accumulate thousands of liked videos, while the 
 
 The first production run audited 1,676 liked videos, preserved the newest nine, and safely stopped after 102 successful updates when the API returned a permission/limit signal.
 
+## What this demonstrates
+
+This project is a small but serious example of destructive automation design. The interesting part is not the API loop; it is the safety envelope around an account-wide change:
+
+- preview before mutation;
+- explicit human confirmation before execution;
+- bounded batches to respect quota and reduce blast radius;
+- JSON audit output for every run;
+- stop-on-error behavior that preserves completed work without hiding failures.
+
+For reviewers, the repository shows ownership of risk, practical API integration, and a preference for observable automation over blind bulk changes.
+
 ## Features
 
 - Dry-run by default; account changes require `--execute`.
@@ -47,19 +59,19 @@ flowchart LR
 
 ```text
 YT_UnLike/
-├── config/
-│   └── private/              # ignored OAuth credentials and token
-├── docs/
-│   ├── medium-article.md
-│   └── portfolio.md
-├── runtime/                  # ignored execution reports
-├── skills/
-│   └── publish-github-medium/
-├── tests/
-│   └── test_split_keep_unlike.py
-├── cleanup_liked.py
-├── requirements.txt
-└── README.md
+|-- config/
+|   `-- private/              # ignored OAuth credentials and token
+|-- docs/
+|   |-- medium-article.md
+|   `-- portfolio.md
+|-- runtime/                  # ignored execution reports
+|-- skills/
+|   `-- publish-github-medium/
+|-- tests/
+|   `-- test_split_keep_unlike.py
+|-- cleanup_liked.py
+|-- requirements.txt
+`-- README.md
 ```
 
 ## Installation
@@ -123,6 +135,10 @@ Current suite covers keeping N, keeping all, keeping zero, and invalid negative 
 - OAuth authorization and API enablement are independent Google Cloud steps.
 - Windows terminal encoding must be handled explicitly for global video titles.
 - API permission errors are normal operational data, not reasons to lose prior progress.
+
+## Professional signals
+
+The repository is designed to be readable by engineers who care about production safety. It documents the failure mode, the execution boundary, the test coverage, the secret-handling rule, and the operational result instead of presenting automation as magic.
 
 ## Future improvements
 
